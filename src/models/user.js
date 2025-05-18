@@ -21,6 +21,13 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "pet"
   }],
+
+  wishlist: [
+    {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "pet",
+    },
+],
   
   createdAt: { type: Date, default: Date.now }
 });

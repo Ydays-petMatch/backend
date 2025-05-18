@@ -3,14 +3,13 @@ const User = require("../models/user");
 const path = require("path");
 const fs = require("fs");
 
-// ➕ Créer un animal lié à l'utilisateur connecté
+
 exports.createPet = async (req, res) => {
   try {
     const petData = req.body;
 
-    // Vérif simples
     if (!["male", "femelle"].includes(petData.genre?.toLowerCase())) {
-      return res.status(400).json({ error: "Genre invalide" });
+      return res.json({ message: "Genre invalide", code: 400 });
     }
 
     const photoPaths = req.files.map(file => `../uploads/${file.filename}`);
@@ -19,49 +18,58 @@ exports.createPet = async (req, res) => {
       ...petData,
       age: Number(petData.age),
       photos: photoPaths,
-      owner: req.userId // assigné automatiquement
+      owner: req.userId
     });
 
     await pet.save();
 
-    // Lier le pet à l'utilisateur
     await User.findByIdAndUpdate(req.userId, { $push: { pets: pet._id } });
 
-    res.status(201).json(pet);
+    return res.json({
+      message: "Animal créé avec succès",
+      code: 201,
+      data: pet
+    });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    return res.json({ message: "Erreur lors de la création", code: 400 });
   }
 };
 
-// Voir tous les animaux
 exports.getAllPets = async (req, res) => {
   try {
     const pets = await Pet.find().populate("owner");
-    res.json(pets);
+    return res.json({
+      message: "Liste des animaux récupérée",
+      code: 200,
+      data: pets
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.json({ message: "Erreur serveur", code: 500 });
   }
 };
 
-// Voir un animal
 exports.getPetById = async (req, res) => {
   try {
     const pet = await Pet.findById(req.params.id).populate("owner");
-    if (!pet) return res.status(404).json({ message: "Animal non trouvé" });
-    res.json(pet);
+    if (!pet) return res.json({ message: "Animal non trouvé", code: 404 });
+
+    return res.json({
+      message: "Animal trouvé",
+      code: 200,
+      data: pet
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.json({ message: "Erreur serveur", code: 500 });
   }
 };
 
-// Modifier un animal (seulement par son owner)
 exports.updatePet = async (req, res) => {
   try {
     const pet = await Pet.findById(req.params.id);
-    if (!pet) return res.status(404).json({ message: "Pet non trouvé" });
+    if (!pet) return res.json({ message: "Animal non trouvé", code: 404 });
 
     if (pet.owner.toString() !== req.userId)
-      return res.status(403).json({ error: "Non autorisé" });
+      return res.json({ message: "Non autorisé", code: 403 });
 
     const updateData = req.body;
 
@@ -75,22 +83,24 @@ exports.updatePet = async (req, res) => {
       runValidators: true
     });
 
-    res.json(updatedPet);
+    return res.json({
+      message: "Animal mis à jour avec succès",
+      code: 200,
+      data: updatedPet
+    });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    return res.json({ message: "Requête invalide", code: 400 });
   }
 };
 
-// Supprimer un animal (et ses photos)
 exports.deletePet = async (req, res) => {
   try {
     const pet = await Pet.findById(req.params.id);
-    if (!pet) return res.status(404).json({ error: "Pet non trouvé" });
+    if (!pet) return res.json({ message: "Animal non trouvé", code: 404 });
 
     if (pet.owner.toString() !== req.userId)
-      return res.status(403).json({ error: "Non autorisé" });
+      return res.json({ message: "Non autorisé", code: 403 });
 
-    // Supprimer photos du disque
     for (const photo of pet.photos) {
       const filePath = path.join(__dirname, "..", photo);
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
@@ -98,85 +108,92 @@ exports.deletePet = async (req, res) => {
 
     await pet.deleteOne();
 
-    res.json({ message: "Animal supprimé avec succès" });
+    return res.json({
+      message: "Animal supprimé avec succès",
+      code: 200
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.json({ message: "Erreur serveur", code: 500 });
   }
 };
 
-// Voir tous les animaux d’un user
 exports.getPetsByUser = async (req, res) => {
   try {
     const pets = await Pet.find({ owner: req.params.id });
-    res.json(pets);
+    return res.json({
+      message: "Animaux récupérés pour l'utilisateur",
+      code: 200,
+      data: pets
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.json({ message: "Erreur serveur", code: 500 });
   }
 };
-
 
 
 exports.deletePetPhoto = async (req, res) => {
   try {
     const { id, filename } = req.params;
-
     const pet = await Pet.findById(id);
+
     if (!pet) {
-      return res.status(404).json({ message: "Animal non trouvé" });
+      return res.json({ message: "Animal non trouvé", code: 404 });
     }
 
-    // Vérifie si la photo existe dans le tableau
     const photoPath = `../uploads/${filename}`;
     const photoIndex = pet.photos.indexOf(photoPath);
 
     if (photoIndex === -1) {
-      return res.status(404).json({ message: "Photo non trouvée" });
+      return res.json({ message: "Photo non trouvée", code: 404 });
     }
 
-    // Supprime du tableau
     pet.photos.splice(photoIndex, 1);
     await pet.save();
 
-    // Supprime du disque
     const fullPath = path.join(__dirname, "..", "uploads", filename);
     fs.unlink(fullPath, (err) => {
       if (err) {
-        console.warn("Photo supprimée du modèle mais pas du disque :", err.message);
+        console.warn("Erreur suppression disque :", err.message);
       }
     });
 
-    res.status(200).json({ message: "Photo supprimée avec succès" });
+    return res.json({
+      message: "Photo supprimée avec succès",
+      code: 200,
+      data: pet.photos
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.json({ message: "Erreur serveur", code: 500 });
   }
 };
 
 exports.deleteAllPetPhotos = async (req, res) => {
   try {
     const { id } = req.params;
-
     const pet = await Pet.findById(id);
+
     if (!pet) {
-      return res.status(404).json({ message: "Animal non trouvé" });
+      return res.json({ message: "Animal non trouvé", code: 404 });
     }
 
-    // Supprimer les fichiers du disque
     for (const photo of pet.photos) {
       const filename = photo.split("../uploads/")[1];
       const filePath = path.join(__dirname, "..", "uploads", filename);
       fs.unlink(filePath, (err) => {
         if (err) {
-          console.warn(`Erreur suppression de ${filename} : ${err.message}`);
+          console.warn(`Erreur suppression : ${err.message}`);
         }
       });
     }
 
-    // Vider le tableau des photos
     pet.photos = [];
     await pet.save();
 
-    res.status(200).json({ message: "Toutes les photos ont été supprimées" });
+    return res.json({
+      message: "Toutes les photos ont été supprimées",
+      code: 200
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.json({ message: "Erreur serveur", code: 500 });
   }
 };
