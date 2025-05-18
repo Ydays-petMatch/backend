@@ -18,7 +18,7 @@ exports.createPet = async (req, res) => {
       ...petData,
       age: Number(petData.age),
       photos: photoPaths,
-      owner: req.userId
+      owner: req.userToken.id
     });
 
     await pet.save();
@@ -68,7 +68,7 @@ exports.updatePet = async (req, res) => {
     const pet = await Pet.findById(req.params.id);
     if (!pet) return res.json({ message: "Animal non trouvé", code: 404 });
 
-    if (pet.owner.toString() !== req.userId)
+    if (pet.owner.toString() !== req.userToken.id)
       return res.json({ message: "Non autorisé", code: 403 });
 
     const updateData = req.body;
@@ -98,7 +98,7 @@ exports.deletePet = async (req, res) => {
     const pet = await Pet.findById(req.params.id);
     if (!pet) return res.json({ message: "Animal non trouvé", code: 404 });
 
-    if (pet.owner.toString() !== req.userId)
+    if (pet.owner.toString() !== req.userToken.id)
       return res.json({ message: "Non autorisé", code: 403 });
 
     for (const photo of pet.photos) {
