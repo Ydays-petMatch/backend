@@ -1,7 +1,7 @@
 const Pet = require("../models/pet");
 const User = require("../models/user");
 
-exports.addWhishlist = async (req, res) => {
+exports.addWishlist = async (req, res) => {
     try {
         const userId = req.userToken.id;
         const user = await User.findById(String(userId));
@@ -43,7 +43,7 @@ exports.addWhishlist = async (req, res) => {
     }
 };
 
-exports.getWhishlists = async (req, res) => {
+exports.getWishlists = async (req, res) => {
     try {
         const userId = req.userToken.id;
         const user = await User.findById(userId).populate("wishlist");
@@ -54,7 +54,7 @@ exports.getWhishlists = async (req, res) => {
             });
         }
         return res.json({
-            message: "whishlist found",
+            message: "wishlist found",
             code: 200,
             data: user.wishlist,
         });
@@ -67,7 +67,7 @@ exports.getWhishlists = async (req, res) => {
     }
 };
 
-exports.deleteWhishlist = async (req, res) => {
+exports.deleteWishlist = async (req, res) => {
     try {
         const userId = req.userToken.id;
         const petId = req.query.petId;
