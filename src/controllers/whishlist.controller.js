@@ -46,7 +46,7 @@ exports.addWhishlist = async (req, res) => {
 exports.getWhishlists = async (req, res) => {
     try {
         const userId = req.userToken.id;
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate("wishlist");
         if (!user) {
             return res.json({
                 message: "User not found",

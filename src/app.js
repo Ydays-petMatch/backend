@@ -4,12 +4,14 @@ const routes = require("./routes");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpecs = require('./swagger');
 const dotenv = require("dotenv");
+const path = require("path");
 dotenv.config();
 require("./mongoConnection");
 
 const app = express();
 app.use(express.json());
-app.use("/uploads", express.static("uploads"));
+// app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // parse urlencoded request body
 app.use(express.urlencoded({ extended: true }));
