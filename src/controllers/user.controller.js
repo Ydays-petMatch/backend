@@ -18,8 +18,7 @@ exports.getAllUsers = async (req, res) => {
 
 exports.getUserById = async (req, res) => {
   try {
-    const userId = req.userToken.id;
-    const user = await User.findById(userId).populate("pets");
+    const user = await User.findById(req.params.id).populate("pets");
     if (!user) {
       return res.json({
         message: "Utilisateur non trouvé",
