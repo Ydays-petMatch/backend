@@ -7,6 +7,8 @@ const fs = require("fs");
 exports.createPet = async (req, res) => {
   try {
     const petData = req.body;
+    console.log('test id user  : ', req.userId);
+
 
     if (!["male", "femelle"].includes(petData.genre?.toLowerCase())) {
       return res.json({ message: "Genre invalide", code: 400 });
@@ -21,7 +23,8 @@ exports.createPet = async (req, res) => {
       owner: req.userId
     });
 
-    await pet.save();
+    const test = await pet.save();
+    console.log('test save pet  : ', test);
 
     await User.findByIdAndUpdate(req.userId, { $push: { pets: pet._id } });
 
@@ -31,7 +34,7 @@ exports.createPet = async (req, res) => {
       data: pet
     });
   } catch (err) {
-    return res.json({ message: "Erreur lors de la création", code: 400 });
+    return res.json({ message: `Erreur lors de la création ${err}`, code: 400 });
   }
 };
 

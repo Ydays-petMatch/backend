@@ -10,7 +10,7 @@ router.use('/auth', authRoute);
 router.use('/pet', petRoute);
 router.use("/pets", filterRoutes);
 router.use('/user', userRoute);
-router.use("/whishlist", wishlistRoute);
+router.use("/wishlist", wishlistRoute);
 
 
 module.exports = router;

@@ -4,8 +4,13 @@ const User = require("../models/user");
 exports.addWhishlist = async (req, res) => {
     try {
         const userId = req.userToken.id;
+        console.log('zpzppzpz : ', userId)
         const user = await User.findById(String(userId));
+        console.log('zpzppzpz 2: ', User)
+
         const pet = await Pet.findById(String(req.query.petId));
+        console.log('zpzppzpz 3: ', pet)
+
         if (!user) {
             return res.json({
                 message: "User not found",
@@ -46,7 +51,8 @@ exports.addWhishlist = async (req, res) => {
 exports.getWhishlists = async (req, res) => {
     try {
         const userId = req.userToken.id;
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate("wishlist");
+
         if (!user) {
             return res.json({
                 message: "User not found",
@@ -97,7 +103,7 @@ exports.deleteWhishlist = async (req, res) => {
                 code: 400,
             });
         }
-        
+
         user.wishlist = user.wishlist.filter(
             (id) => id != petId
         );

@@ -8,7 +8,7 @@ const petSchema = new mongoose.Schema({
   weight: { type: String, required: true },
   dateOfBirth: { type: Date, required: true },
   genre: { type: String, enum: ["male", "femelle"], required: true },
-  photos: [{ type: String, required: true }],
+  photos: [{ type: String, required: false }],
   position: { type: String, required: true },
   description: { type: String, required: true },
   favoriteActivities: { type: String, required: true },
