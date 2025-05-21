@@ -91,7 +91,7 @@ exports.getMe = async (req, res) => {
         code: 400,
       });
     }
-    const user = await User.findById(String(id).populate("pets"));
+    const user = await User.findById(String(id)).populate("pets");
     if (!user) {
       return res.json({
         message: "Utilisateur non trouvé",
