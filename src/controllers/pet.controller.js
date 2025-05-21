@@ -20,7 +20,7 @@ exports.createPet = async (req, res) => {
       ...petData,
       age: Number(petData.age),
       photos: photoPaths,
-      owner: req.userToken.id
+      owner: req.userId
     });
 
     const test = await pet.save();
