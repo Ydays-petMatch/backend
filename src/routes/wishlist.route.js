@@ -102,10 +102,10 @@ const express = require("express");
 const checkJWT = require("../middlewares/checkJWT");
 const router = express.Router();
 
-const whishlistController = require("../controllers/whishlist.controller");
+const wishlistController = require("../controllers/wishlist.controller");
 
-router.get('/', checkJWT, whishlistController.getWhishlists);
-router.post('/', checkJWT, whishlistController.addWhishlist);
-router.delete('/', checkJWT, whishlistController.deleteWhishlist);
+router.get('/', checkJWT, wishlistController.getWishlists);
+router.post('/', checkJWT, wishlistController.addWishlist);
+router.delete('/', checkJWT, wishlistController.deleteWishlist);
 
 module.exports = router;

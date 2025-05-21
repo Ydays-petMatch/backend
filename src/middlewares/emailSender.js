@@ -20,7 +20,7 @@ const sendEmail = async (req, res) => {
       from: email,
       to: "testpetmatch@gmail.com",
       subject: subject,
-      text: text
+      message: text
     };
 
     try {
